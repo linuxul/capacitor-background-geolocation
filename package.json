@@ -19,18 +19,23 @@
         "android/settings.gradle",
         "android/src/main/",
         "definitions.d.ts",
-        "ios/Plugin/Info.plist",
-        "ios/Plugin/Plugin.*",
-        "ios/Plugin/Swift/Plugin.swift",
-        "ios/Podfile*"
+        "ios/Sources"
     ],
+    "scripts": {
+        "verify": "npm run verify:ios && npm run verify:android",
+        "verify:ios": "CAPACITOR_IOS_PATH=${CAPACITOR_IOS_PATH:-$(node -p \"require('path').dirname(require.resolve('@capacitor/ios/package.json'))\")} xcodebuild -scheme CapacitorCommunityBackgroundGeolocation -destination generic/platform=iOS",
+        "verify:android": "cd android && ./gradlew clean build test && cd ..",
+        "lint": "npm run ktlint",
+        "fmt": "npm run ktlint -- --format",
+        "ktlint": "ktlint \"android/src/**/*.kt\""
+    },
     "devDependencies": {
-        "@capacitor/android": "^7.0.0",
-        "@capacitor/core": "^7.0.0",
-        "@capacitor/ios": "^7.0.0"
+        "@capacitor/android": "^8.0.0",
+        "@capacitor/core": "^8.0.0",
+        "@capacitor/ios": "^8.0.0"
     },
     "peerDependencies": {
-        "@capacitor/core": ">=3.0.0"
+        "@capacitor/core": ">=8.0.0"
     },
     "capacitor": {
         "ios": {

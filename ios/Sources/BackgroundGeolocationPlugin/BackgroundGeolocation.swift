@@ -7,15 +7,9 @@ import CoreLocation
 let null = Optional<Double>.none as Any
 
 func formatLocation(_ location: CLLocation) -> PluginCallResultData {
-    var simulated = false;
-    if #available(iOS 15, *) {
-        // Prior to iOS 15, it was not possible to detect simulated locations.
-        // But in general, it is very difficult to simulate locations on iOS in
-        // production.
-        if location.sourceInformation != nil {
-            simulated = location.sourceInformation!.isSimulatedBySoftware;
-        }
-    }
+    // In general, it is very difficult to simulate locations on iOS in
+    // production.
+    let simulated = location.sourceInformation?.isSimulatedBySoftware ?? false
     return [
         "latitude": location.coordinate.latitude,
         "longitude": location.coordinate.longitude,
@@ -73,9 +67,9 @@ public class BackgroundGeolocation: CAPPlugin,
     public let identifier = "BackgroundGeolocation"
     public let jsName = "BackgroundGeolocation"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "addWatcher", returnType: CAPPluginReturnCallback),
-        CAPPluginMethod(name: "removeWatcher", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "openSettings", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "addWatcher", returnType: .callback),
+        CAPPluginMethod(name: "removeWatcher", returnType: .promise),
+        CAPPluginMethod(name: "openSettings", returnType: .promise)
     ]
 
     @objc public override func load() {

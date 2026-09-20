@@ -12,6 +12,9 @@ Build
 xcuserdata
 xcshareddata
 DerivedData
+.build
+.swiftpm
+/Packages
 
 # macOS files
 .DS_Store

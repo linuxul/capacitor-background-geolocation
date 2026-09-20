@@ -135,6 +135,8 @@ Different versions of the plugin support different versions of Capacitor:
 | v6         | v1     |
 | v7         | v1     |
 
+This version requires the forked Capacitor 8 runtime (Kotlin on Android, Swift on iOS), iOS 17 or later and Android 13 (API 33) or later.
+
 Read the documentation for v0.3 [here](https://github.com/capacitor-community/background-geolocation/tree/0.3.x).
 
 ```sh
