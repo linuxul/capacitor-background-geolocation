@@ -30,9 +30,9 @@
         "ktlint": "ktlint \"android/src/**/*.kt\""
     },
     "devDependencies": {
-        "@capacitor/android": "^8.0.0",
-        "@capacitor/core": "^8.0.0",
-        "@capacitor/ios": "^8.0.0"
+        "@capacitor/android": "https://github.com/linuxul/capacitor/releases/download/8.5.3/capacitor-android-8.5.3.tgz",
+        "@capacitor/core": "https://github.com/linuxul/capacitor/releases/download/8.5.3/capacitor-core-8.5.3.tgz",
+        "@capacitor/ios": "https://github.com/linuxul/capacitor/releases/download/8.5.3/capacitor-ios-8.5.3.tgz"
     },
     "peerDependencies": {
         "@capacitor/core": ">=8.0.0"
