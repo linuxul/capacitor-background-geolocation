@@ -1,6 +1,6 @@
 {
     "name": "@capacitor-community/background-geolocation",
-    "version": "1.2.26",
+    "version": "2.0.0",
     "description": "Receive geolocation updates even while the app is in the background.",
     "repository": {
         "type": "git",
@@ -35,7 +35,7 @@
         "@capacitor/ios": "https://github.com/linuxul/capacitor/releases/download/9.0.0/capacitor-ios-9.0.0.tgz"
     },
     "peerDependencies": {
-        "@capacitor/core": ">=8.0.0"
+        "@capacitor/core": ">=9.0.0"
     },
     "capacitor": {
         "ios": {
