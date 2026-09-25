@@ -27,6 +27,7 @@ import com.getcapacitor.Logger
 import com.getcapacitor.PermissionState
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
+import com.getcapacitor.PluginException
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
 import com.getcapacitor.annotation.Permission
@@ -63,11 +64,7 @@ public class BackgroundGeolocation : Plugin() {
 
     @PluginMethod(returnType = PluginMethod.RETURN_CALLBACK)
     public fun addWatcher(call: PluginCall) {
-        val service = service
-        if (service == null) {
-            call.reject("Service not running.")
-            return
-        }
+        val service = service ?: throw PluginException("Service not running.")
         call.keepAlive = true
 
         if (getPermissionState("location") != PermissionState.GRANTED) {
@@ -139,8 +136,7 @@ public class BackgroundGeolocation : Plugin() {
     @PermissionCallback
     private fun locationPermissionsCallback(call: PluginCall) {
         if (getPermissionState("location") != PermissionState.GRANTED) {
-            call.reject("User denied location permission", "NOT_AUTHORIZED")
-            return
+            throw PluginException("User denied location permission", "NOT_AUTHORIZED")
         }
         if (call.getBoolean("stale", false) == true) {
             fetchLastLocation(call)
@@ -155,11 +151,7 @@ public class BackgroundGeolocation : Plugin() {
 
     @PluginMethod
     public fun removeWatcher(call: PluginCall) {
-        val callbackId = call.getString("id")
-        if (callbackId == null) {
-            call.reject("Missing id.")
-            return
-        }
+        val callbackId = call.getString("id") ?: throw PluginException("Missing id.")
         // Without a bound service this was a NullPointerException in the Java implementation as well.
         service!!.removeWatcher(callbackId)
         bridge.getSavedCall(callbackId)?.release(bridge)
