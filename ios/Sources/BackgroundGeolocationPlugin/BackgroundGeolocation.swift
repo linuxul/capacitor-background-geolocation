@@ -67,16 +67,19 @@ public class BackgroundGeolocation: CAPPlugin,
     public let identifier = "BackgroundGeolocation"
     public let jsName = "BackgroundGeolocation"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "addWatcher", returnType: .callback),
-        CAPPluginMethod(name: "removeWatcher", returnType: .promise),
-        CAPPluginMethod(name: "openSettings", returnType: .promise)
+        .callback("addWatcher", BackgroundGeolocation.addWatcher),
+        .promise("removeWatcher", BackgroundGeolocation.removeWatcher),
+        .async("openSettings", BackgroundGeolocation.openSettings)
     ]
 
     @objc public override func load() {
         UIDevice.current.isBatteryMonitoringEnabled = true
     }
 
-    @objc func addWatcher(_ call: CAPPluginCall) {
+    // addWatcher and removeWatcher stay synchronous: the bridge queue runs them in the order of the calls and they hand
+    // the location managers to the main queue in that order, so a watcher is added before it is removed.
+
+    func addWatcher(_ call: CAPPluginCall) {
         call.keepAlive = true
 
         // CLLocationManager requires main thread
@@ -132,45 +135,39 @@ public class BackgroundGeolocation: CAPPlugin,
         }
     }
 
-    @objc func removeWatcher(_ call: CAPPluginCall) {
+    func removeWatcher(_ call: CAPPluginCall) throws {
+        guard let callbackId = call.getString("id") else {
+            throw CAPPluginError("No callback ID")
+        }
         // CLLocationManager requires main thread
         DispatchQueue.main.async {
-            if let callbackId = call.getString("id") {
-                if let index = self.watchers.firstIndex(
-                    where: { $0.callbackId == callbackId }
-                ) {
-                    self.watchers[index].locationManager.stopUpdatingLocation()
-                    self.watchers.remove(at: index)
-                }
-                if let savedCall = self.bridge?.savedCall(withID: callbackId) {
-                    self.bridge?.releaseCall(savedCall)
-                }
-                return call.resolve()
+            if let index = self.watchers.firstIndex(
+                where: { $0.callbackId == callbackId }
+            ) {
+                self.watchers[index].locationManager.stopUpdatingLocation()
+                self.watchers.remove(at: index)
             }
-            return call.reject("No callback ID")
+            if let savedCall = self.bridge?.savedCall(withID: callbackId) {
+                self.bridge?.releaseCall(savedCall)
+            }
+            call.resolve()
         }
     }
 
-    @objc func openSettings(_ call: CAPPluginCall) {
-        DispatchQueue.main.async {
-            guard let settingsUrl = URL(
-                string: UIApplication.openSettingsURLString
-            ) else {
-                return call.reject("No link to settings available")
-            }
-
-            if UIApplication.shared.canOpenURL(settingsUrl) {
-                UIApplication.shared.open(settingsUrl, completionHandler: {
-                    (success) in
-                    if (success) {
-                        return call.resolve()
-                    } else {
-                        return call.reject("Failed to open settings")
-                    }
-                })
-            } else {
-                return call.reject("Cannot open settings")
-            }
+    /// Opens the app's page in Settings and returns once the system opened it. It ran on the main queue: the method
+    /// runs on the main actor.
+    @MainActor
+    func openSettings(_ call: CAPPluginCall) async throws {
+        guard let settingsUrl = URL(
+            string: UIApplication.openSettingsURLString
+        ) else {
+            throw CAPPluginError("No link to settings available")
+        }
+        guard UIApplication.shared.canOpenURL(settingsUrl) else {
+            throw CAPPluginError("Cannot open settings")
+        }
+        guard await UIApplication.shared.open(settingsUrl) else {
+            throw CAPPluginError("Failed to open settings")
         }
     }
 
